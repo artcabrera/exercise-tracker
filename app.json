@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "exercise-tracker",
+    "name": "Exercise Tracker",
     "slug": "exercise-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,9 +14,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -24,10 +22,21 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.noelsavilla.exercisetracker",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDzwBV-xxTEHgzwnalPt18ceq4ZP0r5wjg"
+        }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7db8452d-2d66-49e3-b87f-f1f6490c1970"
+      }
     }
   }
 }

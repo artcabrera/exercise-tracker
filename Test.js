@@ -33,8 +33,8 @@ const { width, height } = Dimensions.get("screen");
 
 const LATITUDE_DELTA = 0.007;
 const LONGITUDE_DELTA = 0.007;
-const LATITUDE = 14.517618;
-const LONGITUDE = 121.050865;
+const LATITUDE = 11.58291;
+const LONGITUDE = 122.753156;
 
 export default function App() {
   const [currentStepCount, setCurrentStepCount] = useState(0);
@@ -63,8 +63,10 @@ export default function App() {
   const [onWalk, setOnWalk] = useState(false);
 
   let _subscription;
+  let _dist = currentStepCount / 1300;
+  let distanceCovered = _dist.toFixed(2);
 
-  let _cal = distanceTravelled * 60;
+  let _cal = distanceCovered * 60;
   let caloriesBurnt = _cal.toFixed(2);
 
   const _unsubscribe = () => {
@@ -132,8 +134,6 @@ export default function App() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-
-        console.log(latitude, longitude);
 
         const newCoordinates = {
           latitude,
@@ -336,7 +336,7 @@ export default function App() {
               <FontAwesome5 name="road" size={width * 0.08} color="#FF7000" />
             </View>
             <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-              {distanceTravelled.toFixed(2)}km
+              {distanceTravelled}km
             </Text>
           </View>
           <View
