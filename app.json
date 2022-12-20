@@ -16,7 +16,8 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.noelsavilla.exercisetracker"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +27,7 @@
       "package": "com.noelsavilla.exercisetracker",
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyDzwBV-xxTEHgzwnalPt18ceq4ZP0r5wjg"
+          "apiKey": "AIzaSyBe8DdG_zgD9-IBB1MoQu4WWvyysZP8HfU"
         }
       }
     },

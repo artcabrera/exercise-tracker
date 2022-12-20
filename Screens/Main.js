@@ -9,9 +9,11 @@ import {
   Platform,
 } from "react-native";
 import { Pedometer } from "expo-sensors";
+import Svg, { Ellipse } from "react-native-svg";
 import haversine from "haversine";
 import { StatusBar } from "expo-status-bar";
 import { FontAwesome5, AntDesign } from "@expo/vector-icons";
+import * as SQLite from "expo-sqlite";
 import MapView, {
   AnimatedRegion,
   Callout,
@@ -33,10 +35,11 @@ const { width, height } = Dimensions.get("screen");
 
 const LATITUDE_DELTA = 0.007;
 const LONGITUDE_DELTA = 0.007;
-const LATITUDE = 11.58291;
-const LONGITUDE = 122.753156;
+const LATITUDE = 14.517618;
+const LONGITUDE = 121.050865;
 
-export default function App() {
+export default function Main({ navigation }) {
+  const db = SQLite.openDatabase("steptracker");
   const [currentStepCount, setCurrentStepCount] = useState(0);
   const [isPedometerAvailable, setIsPedometerAvailable] = useState("Checking");
   const [timeInterval, setTimeInterval] = useState(0);
@@ -54,8 +57,6 @@ export default function App() {
       longitudeDelta: LONGITUDE_DELTA,
     })
   );
-  const [fromLocation, setFromLocation] = useState("");
-  const [toLocation, setToLocation] = useState("");
   const marker = useRef(null).current;
 
   const fadeMap = useRef(new Animated.Value(0)).current;
@@ -63,10 +64,8 @@ export default function App() {
   const [onWalk, setOnWalk] = useState(false);
 
   let _subscription;
-  let _dist = currentStepCount / 1300;
-  let distanceCovered = _dist.toFixed(2);
 
-  let _cal = distanceCovered * 60;
+  let _cal = distanceTravelled * 60;
   let caloriesBurnt = _cal.toFixed(2);
 
   const _unsubscribe = () => {
@@ -76,7 +75,7 @@ export default function App() {
 
   const _subscribe = () => {
     _subscription = Pedometer.watchStepCount((result) => {
-      setCurrentStepCount(result.steps);
+      // setCurrentStepCount(result.steps);
     });
 
     Pedometer.isAvailableAsync().then(
@@ -100,6 +99,18 @@ export default function App() {
   };
 
   const handleStop = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO steps (month,day,steps) VALUES (?,?,?)",
+        [new Date().getMonth() + 1, new Date().getUTCDate(), currentStepCount],
+        (txObj, resultSet) => console.log(resultSet),
+        (txObj, error) => console.log(error)
+      );
+    });
+
+    setDistanceTravelled(0);
+    setCurrentStepCount(0);
+    caloriesBurnt = 0;
     setTimeInterval(0);
     _unsubscribe();
     setOnWalk(false);
@@ -108,6 +119,7 @@ export default function App() {
       toValue: 0,
       duration: 0,
     }).start();
+    navigation.navigate("PastSteps", { steps: currentStepCount });
   };
 
   useEffect(() => {
@@ -117,6 +129,7 @@ export default function App() {
         setTimeInterval((timeInterval) => timeInterval + 1);
         trackLocation();
       }, 1000);
+      setCurrentStepCount(Math.ceil(distanceTravelled * 762));
     } else if (!onWalk && timeInterval !== 0) {
       clearInterval(interval);
     }
@@ -176,13 +189,6 @@ export default function App() {
     return haversine(prevLatLng, newLatLng) || 0;
   };
 
-  const getMapRegion = () => ({
-    latitude,
-    longitude,
-    latitudeDelta: LATITUDE_DELTA,
-    longitudeDelta: LONGITUDE_DELTA,
-  });
-
   return (
     <SafeAreaView
       style={{
@@ -233,7 +239,6 @@ export default function App() {
           overflow: "hidden",
         }}
       >
-        <Polyline coordinates={routeCoordinates} strokeWidth={5} />
         <Animated.View
           style={{ width: "100%", height: "100%", opacity: fadeMap }}
         >
@@ -249,14 +254,25 @@ export default function App() {
             }}
             style={{ width: "100%", height: "100%" }}
           >
+            <Polyline coordinates={routeCoordinates} strokeWidth={5} />
             <MarkerAnimated
               pinColor="#540375"
               coordinate={coordinates}
               ref={marker}
             >
-              <Callout>
-                <Text>You are here!</Text>
-              </Callout>
+              <View>
+                <Svg height={20} width={20}>
+                  <Ellipse
+                    cx="10"
+                    cy="10"
+                    rx="10"
+                    ry="10"
+                    fill="red"
+                    stroke="#ffffffaa"
+                    strokeWidth="5"
+                  />
+                </Svg>
+              </View>
             </MarkerAnimated>
           </MapView>
         </Animated.View>
@@ -336,7 +352,7 @@ export default function App() {
               <FontAwesome5 name="road" size={width * 0.08} color="#FF7000" />
             </View>
             <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-              {distanceTravelled}km
+              {distanceTravelled.toFixed(2)}km
             </Text>
           </View>
           <View
